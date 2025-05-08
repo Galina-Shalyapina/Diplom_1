@@ -1,64 +1,63 @@
 import pytest
+
 from ..burger import Burger
+from ..data import BURGER_PRICE_TEST_DATA, COMMON_TEST_DATA
 
-# Вспомогательные классы-заглушки необходимы для изоляции тестов
 
-# Вспомогательный класс-заглушка для булочки
-class DummyBun:
-    def get_price(self):
-        return 50
-    def get_name(self):
-        return "Test Bun"
+# Тест расчета цены бургера
+@pytest.mark.parametrize("ingredients, expected_price", BURGER_PRICE_TEST_DATA)
+def test_burger_price(bun_mock, ingredient_mock, ingredients, expected_price):
+    burger = Burger()
 
-# Вспомогательный класс-заглушка для ингредиента
-class DummyIngredient:
-    def __init__(self, name, price, type_):
-        self._name = name
-        self._price = price
-        self._type = type_
-    def get_price(self):
-        return self._price
-    def get_name(self):
-        return self._name
-    def get_type(self):
-        return self._type
+    # Устанавливаем булочку
+    burger.set_buns(bun_mock())
 
-# Фикстура для создания пустого бургера
-@pytest.fixture
-def burger():
-    return Burger()
+    # Добавляем ингредиенты
+    for type_, name, price in ingredients:
+        burger.add_ingredient(ingredient_mock(type_, name, price))
 
-# Проверяем расчет цены с разными наборами ингредиентов
-@pytest.mark.parametrize("ingredients,expected_price", [
-    ([DummyIngredient("A", 10, "SAUCE")], 50*2+10),
-    ([DummyIngredient("A", 10, "SAUCE"), DummyIngredient("B", 20, "FILLING")], 50*2+10+20),
-])
-def test_burger_price(burger, ingredients, expected_price):
-    burger.set_buns(DummyBun())
-    for ing in ingredients:
-        burger.add_ingredient(ing)
     assert burger.get_price() == expected_price
 
-# Проверяем добавление, перемещение и удаление ингредиентов
-def test_burger_add_remove_move_ingredient(burger):
-    burger.set_buns(DummyBun())
-    ing1 = DummyIngredient("A", 10, "SAUCE")
-    ing2 = DummyIngredient("B", 20, "FILLING")
-    ing3 = DummyIngredient("C", 30, "FILLING")
+
+# Тест добавления, удаления и перемещения ингредиентов
+def test_burger_add_remove_move_ingredient(bun_mock, ingredient_mock):
+    burger = Burger()
+
+    # Устанавливаем булочку
+    burger.set_buns(bun_mock())
+
+    # Создаем ингредиенты
+    ing1 = ingredient_mock("SAUCE", "A", 10)
+    ing2 = ingredient_mock("FILLING", "B", 20)
+    ing3 = ingredient_mock("FILLING", "C", 30)
+
+    # Добавляем ингредиенты
     burger.add_ingredient(ing1)
     burger.add_ingredient(ing2)
     burger.add_ingredient(ing3)
+
+    # Перемещаем ингредиент
     burger.move_ingredient(2, 0)
     assert burger.ingredients[0] == ing3
+
+    # Удаляем ингредиент
     burger.remove_ingredient(1)
     assert len(burger.ingredients) == 2
 
-# Проверяем корректность чека
-def test_burger_receipt(burger):
-    burger.set_buns(DummyBun())
-    ing = DummyIngredient("A", 10, "SAUCE")
-    burger.add_ingredient(ing)
+
+# Тест генерации чека
+def test_burger_receipt(bun_mock, ingredient_mock):
+    burger = Burger()
+
+    # Устанавливаем булочку
+    burger.set_buns(bun_mock())
+
+    # Создаем ингредиент
+    ingredient = ingredient_mock("SAUCE", "A", 10)
+    burger.add_ingredient(ingredient)
+
     receipt = burger.get_receipt()
-    assert "Test Bun" in receipt
+
+    assert COMMON_TEST_DATA['BUN_NAME'] in receipt
     assert "a A" in receipt or "A" in receipt
-    assert "Price: 110" in receipt
+    assert f"Price: {COMMON_TEST_DATA['BUN_PRICE'] * 2 + 10}" in receipt

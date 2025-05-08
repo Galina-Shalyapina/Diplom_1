@@ -1,29 +1,32 @@
 import pytest
 from ..bun import Bun
+from ..data import BUN_TEST_DATA, COMMON_TEST_DATA
 
-# Тестируем инициализацию и геттеры Bun
-@pytest.mark.parametrize("name, price", [
-    ("black bun", 100),
-    ("white bun", 200),
-    ("red bun", 300),
-])
+# Тест инициализации булочки и геттеров
+@pytest.mark.parametrize("name, price", BUN_TEST_DATA)
 def test_bun_init_and_getters(name, price):
     bun = Bun(name, price)
     assert bun.get_name() == name
     assert bun.get_price() == price
 
-# Проверяем, что поля инициализируются корректно
+# Тест инициализации булочки
 def test_bun_init():
-    bun = Bun("Test", 123.45)
-    assert bun.name == "Test"
-    assert bun.price == 123.45
+    name = "Test"
+    price = 123.45
+    bun = Bun(name, price)
+    assert bun.name == name
+    assert bun.price == price
 
-# Проверяем работу get_name
+# Тест метода get_name
 def test_bun_get_name():
-    bun = Bun("Test", 123.45)
-    assert bun.get_name() == "Test"
+    name = COMMON_TEST_DATA['BUN_NAME']
+    price = COMMON_TEST_DATA['BUN_PRICE']
+    bun = Bun(name, price)
+    assert bun.get_name() == name
 
-# Проверяем работу get_price
+# Тест метода get_price
 def test_bun_get_price():
-    bun = Bun("Test", 123.45)
-    assert bun.get_price() == 123.45
+    name = COMMON_TEST_DATA['BUN_NAME']
+    price = COMMON_TEST_DATA['BUN_PRICE']
+    bun = Bun(name, price)
+    assert bun.get_price() == price
